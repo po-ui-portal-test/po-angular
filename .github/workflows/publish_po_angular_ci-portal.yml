@@ -100,13 +100,27 @@ jobs:
 
     - name: Log URL to the repo
       run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
-
-    - name: Deploy to Portal Build Repository
-      if: steps.check-version.outputs.version_check == 'not_equal'
+    
+    - name: Add readme to the repository
+      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
+      run: |
+        echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
+        cd po-portal
+        git init
+        git add README.md
+        git commit -m "Initial commit with README"
+        git branch -M gh-pages
+        git remote add origin "${{ steps.create-repo.outputs.repo-url }}"
+        git push -u origin gh-pages --force
+      working-directory: ${{env.WORKING_DIR}}
+    
+    - name: Check out to Portal Build Repository
+      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'true'
       uses: actions/checkout@v4
       with:
         repository: po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}
         path: po-portal
+        ref: gh-pages
     
     - name: Install angular cli
       if: steps.check-version.outputs.version_check == 'not_equal'
