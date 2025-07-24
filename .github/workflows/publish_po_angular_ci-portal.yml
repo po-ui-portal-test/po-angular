@@ -128,6 +128,7 @@ jobs:
         cd po-portal
         git add README.md
         git commit -m "Initial commit with README"
+        git remote set-url origin "https://${{ secrets.GITHUB_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
         git push -u origin main --force
       working-directory: ${{env.WORKING_DIR}}
     
