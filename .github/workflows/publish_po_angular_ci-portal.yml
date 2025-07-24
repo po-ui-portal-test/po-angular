@@ -80,8 +80,7 @@ jobs:
       if: steps.check-version.outputs.version_check == 'not_equal'
       id: check-repo
       run: |
-        REPO_NAME="po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
-        REPO_URL="https://api.github.com/repos/po-ui-portal-test/${REPO_NAME}"
+        REPO_URL="https://api.github.com/repos/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
         response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$REPO_URL")
         if [ "$response" -eq 200 ]; then
           echo "repository_exists=true" >> "$GITHUB_OUTPUT"
