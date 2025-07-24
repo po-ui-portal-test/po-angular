@@ -278,4 +278,70 @@ gulp.task('build:analytics', done => {
   done();
 });
 
-gulp.task('build', gulp.series('clean-docs', 'build:api', 'build:guides', 'build:menus', 'build:analytics'));
+/**
+ * Tarefa para obter o histórico de versões publicadas do portal
+ *
+ * @task {build:portal-history}
+ */
+gulp.task('build:portal-history', done => {
+  const organizationName = 'po-ui-portal-test';
+  const portalRepositoryPrefix = 'po-ui-portal-';
+
+  const packageJsonPath = path.resolve(__dirname, '../../package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  const currentVersion = packageJson.version;
+
+  const majorVersion = currentVersion.split('.')[0];
+
+  const environments = ['src/environments/environment.ts', 'src/environments/environment.prod.ts'];
+  environments.forEach(envFile => {
+    if (fs.existsSync(envFile)) {
+      const envContent = fs.readFileSync(envFile, 'utf8');
+      const updatedContent = envContent.replace(/portalVersion:\s*'[^']*'/, `portalVersion: 'v${majorVersion}'`);
+      fs.writeFileSync(envFile, updatedContent, 'utf8');
+    }
+  });
+
+  fetch(`https://api.github.com/orgs/${organizationName}/repos`)
+    .then(response => response.json())
+    .then(data => {
+      const repositories = data.filter(repo => {
+        const repoName = repo.name;
+        if (repoName.startsWith(portalRepositoryPrefix)) {
+          const version = repoName.replace(portalRepositoryPrefix, '');
+          const versionRegex = /^v\d+$/;
+          return versionRegex.test(version);
+        }
+        return false;
+      });
+
+      const portalHistory = repositories.map(repo => {
+        return repo.name.replace(portalRepositoryPrefix, '');
+      });
+
+      if (!portalHistory.includes(`v${majorVersion}`)) {
+        portalHistory.unshift(`v${majorVersion}`);
+      }
+
+      portalHistory.sort((a, b) => b.localeCompare(a));
+      portalHistory.unshift('next');
+
+      environments.forEach(envFile => {
+        if (fs.existsSync(envFile)) {
+          const envContent = fs.readFileSync(envFile, 'utf8');
+          const updatedContent = envContent.replace(
+            /portalVersions:\s*(?:\[[^\]]*\]|'[^']*'|""|''|\")/,
+            `portalVersions: [${portalHistory.map(v => `'${v}'`).join(', ')}]`
+          );
+          fs.writeFileSync(envFile, updatedContent, 'utf8');
+        }
+      });
+
+      done();
+    });
+});
+
+gulp.task(
+  'build',
+  gulp.series('clean-docs', 'build:api', 'build:guides', 'build:menus', 'build:analytics', 'build:portal-history')
+);

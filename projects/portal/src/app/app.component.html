@@ -1,5 +1,24 @@
 <po-navbar [p-logo]="logoPoUI" p-shadow [p-icon-actions]="iconActions" [p-items]="items"> </po-navbar>
 
+<ng-template #versionSelector>
+  <!-- Desktop selection -->
+  <select class="version-selector" (change)="changeVersion($event.target.value)">
+    @for (item of portalVersions; track $index) {
+      <option [value]="item.value" [selected]="item.value === portalVersion">{{ item.label }}</option>
+    }
+  </select>
+  <!-- Mobile action icon -->
+  <po-icon p-icon="an an-tag" class="version-selector-icon"></po-icon>
+</ng-template>
+
+<po-modal #versionSelectorModal p-title="Selecionar Versão" class="version-selector-modal">
+  @for (item of portalVersions; track $index) {
+    <div class="po-row po-mb-1">
+      <po-button p-label="{{ item.label }}" (p-click)="changeVersion(item.value)"></po-button>
+    </div>
+  }
+</po-modal>
+
 <!-- <po-menu #userMenu [p-menus]="menus" p-filter></po-menu> -->
 
 <div class="po-wrapper">

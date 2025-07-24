@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TemplateRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
@@ -12,6 +13,7 @@ import {
 import { PoThemeService, PoThemeTypeEnum } from '../../../ui/src/lib';
 import { poThemeConstant } from './shared/po-theme.constant';
 import { VersionService } from './shared/version.service';
+import { environment } from '../environments/environment';
 
 const KEY_STORAGE_REVIEW_SURVEY = 'review_survey_po_ui';
 
@@ -29,6 +31,12 @@ export class AppComponent implements OnInit, OnDestroy {
   logoPoUI = './assets/po-logos/po_black.png';
   theme: PoThemeTypeEnum = 0;
   a11yLevel: PoThemeA11yEnum;
+
+  portalVersion = environment.portalVersion;
+  portalVersions = environment.portalVersions.map(version => ({ label: version, value: version }));
+
+  @ViewChild('versionSelector', { static: true }) versionSelectorTemplate: TemplateRef<any>;
+  @ViewChild('versionSelectorModal', { static: true }) versionSelectorModal: any;
 
   private location;
   private themeChangeListener: any;
@@ -139,7 +147,7 @@ export class AppComponent implements OnInit, OnDestroy {
     window.location.reload();
   }
 
-  get actions() {
+  get actions(): Array<PoNavbarIconAction> {
     return [
       { icon: 'an an-github-logo', link: 'https://github.com/po-ui', label: 'Github', tooltip: 'Github' },
       {
@@ -159,8 +167,28 @@ export class AppComponent implements OnInit, OnDestroy {
         label: `Accessibility level ${this.a11yStorage === 'po-a11y-AAA' ? 'AA' : 'AAA'}`,
         tooltip: `Accessibility level ${this.a11yStorage === 'po-a11y-AAA' ? 'AAA' : 'AA'}`,
         action: this.changeA11yLevel.bind(this)
+      },
+      {
+        icon: this.versionSelectorTemplate,
+        label: 'Versões',
+        tooltip: '',
+        action: () => {
+          const activeElement = document.activeElement as HTMLElement;
+          if (activeElement && !activeElement.classList.contains('version-selector')) {
+            this.versionSelectorModal.open();
+          }
+        }
       }
     ];
+  }
+
+  changeVersion(version: string) {
+    // Navigate to new domain
+    if (version === 'next') {
+      window.location.href = `https://po-ui.io`;
+    } else if (version !== this.portalVersion) {
+      window.location.href = `https://po-ui-portal-test.github.io/po-ui-portal-${version}`;
+    }
   }
 
   ngOnDestroy(): void {
