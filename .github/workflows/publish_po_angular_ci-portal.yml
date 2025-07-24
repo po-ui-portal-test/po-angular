@@ -107,6 +107,7 @@ jobs:
              https://api.github.com/orgs/po-ui-portal-test/repos \
              -d "{\"name\":\"$REPO_NAME\", \"private\":false, \"has_issues\":false, \"has_projects\":false, \"has_wiki\":false}"
         echo "repo-url=https://github.com/po-ui-portal-test/$REPO_NAME" >> "$GITHUB_OUTPUT"
+        echo "repository_name=$REPO_NAME" >> "$GITHUB_OUTPUT"
       working-directory: ${{env.WORKING_DIR}}
 
     - name: Log URL to the repo
@@ -117,6 +118,7 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
+        git config --global init.defaultBranch main
 
     - name: Add readme to the repository
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
@@ -127,9 +129,8 @@ jobs:
         git init
         git add README.md
         git commit -m "Initial commit with README"
-        git branch -M gh-pages
-        git remote add origin "${{ steps.create-repo.outputs.repo-url }}"
-        git push -u origin gh-pages --force
+        git remote set-url origin "git@github.com:po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
+        git push -u origin main --force
       working-directory: ${{env.WORKING_DIR}}
     
     - name: Check out to Portal Build Repository
