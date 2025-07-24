@@ -24,12 +24,6 @@ jobs:
         repository: po-ui/po-style
         path: po-style
 
-    - name: Check out lint
-      uses: actions/checkout@v4
-      with:
-        repository: po-ui/po-tslint
-        path: po-tslint
-
     - name: Install and Build
       run: npm install && npm run build
       working-directory: ${{env.WORKING_DIR}}
