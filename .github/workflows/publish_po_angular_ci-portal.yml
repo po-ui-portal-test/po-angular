@@ -126,6 +126,7 @@ jobs:
         git clone "${{ steps.create-repo.outputs.repo-url }}" po-portal
         echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
         cd po-portal
+        git init
         git add README.md
         git commit -m "Initial commit with README"
         git remote set-url origin "https://${{ secrets.GITHUB_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
@@ -138,7 +139,7 @@ jobs:
       with:
         repository: po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}
         path: po-portal
-        ref: gh-pages
+        ref: main
     
     - name: Install angular cli
       if: steps.check-version.outputs.version_check == 'not_equal'
