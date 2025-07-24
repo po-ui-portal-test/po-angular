@@ -89,13 +89,23 @@ jobs:
         fi
       working-directory: ${{env.WORKING_DIR}}
     
-    - name: Create repository if not exists
+    # - name: Create repository if not exists
+    #   if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
+    #   uses: repo-ctrl/create-repo-action@main 
+    #   id: create-repo
+    #   with:
+    #     repo-name: 'po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}'
+    #     org-admin-token: '${{ secrets.ORG_ADMIN_TOKEN }}'
+
+    - name: Create repository via API if not exists
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
-      uses: repo-ctrl/create-repo-action@main 
-      id: create-repo
-      with:
-        repo-name: 'po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}'
-        org-admin-token: '${{ secrets.ORG_ADMIN_TOKEN }}'
+      run: |
+        REPO_NAME="po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
+        curl -H "Authorization: token ${{ secrets.ORG_ADMIN_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/orgs/po-ui-portal-test/repos \
+             -d "{\"name\":\"$REPO_NAME\", \"private\":false, \"has_issues\":false, \"has_projects\":false, \"has_wiki\":false}"
+      working-directory: ${{env.WORKING_DIR}}
 
     - name: Log URL to the repo
       run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
