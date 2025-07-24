@@ -104,6 +104,7 @@ jobs:
     - name: Add readme to the repository
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
       run: |
+        mkdir -p po-portal
         echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
         cd po-portal
         git init
