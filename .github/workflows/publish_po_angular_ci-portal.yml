@@ -98,6 +98,7 @@ jobs:
     #     org-admin-token: '${{ secrets.ORG_ADMIN_TOKEN }}'
 
     - name: Create repository via API if not exists
+      id: create-repo
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
       run: |
         REPO_NAME="po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
@@ -105,6 +106,7 @@ jobs:
              -H "Accept: application/vnd.github.v3+json" \
              https://api.github.com/orgs/po-ui-portal-test/repos \
              -d "{\"name\":\"$REPO_NAME\", \"private\":false, \"has_issues\":false, \"has_projects\":false, \"has_wiki\":false}"
+        echo "repo-url=https://github.com/po-ui-portal-test/$REPO_NAME" >> "$GITHUB_OUTPUT"
       working-directory: ${{env.WORKING_DIR}}
 
     - name: Log URL to the repo
