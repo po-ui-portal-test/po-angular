@@ -119,28 +119,23 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git config --global init.defaultBranch main
+    
+    - name: Clone portal repository
+      run: |
+        git clone "https://github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}" po-portal
+        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
 
     - name: Add readme to the repository if not exists
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
       run: |
-        git clone "https://github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}" po-portal
         echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
         cd po-portal
         git init
         git add README.md
         git commit -m "Initial commit with README"
-        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
         git push -u origin main --force
         pwd
         ls
-    
-    - name: Check out to Portal Build Repository
-      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'true'
-      uses: actions/checkout@v4
-      with:
-        repository: po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}
-        path: po-portal
-        ref: main
     
     - name: Install angular cli
       if: steps.check-version.outputs.version_check == 'not_equal'
@@ -163,7 +158,6 @@ jobs:
         git add .
         git commit -m "Deploy portal build for version ${{ steps.check-version.outputs.package_version }}"
         git tag "v${{ steps.check-version.outputs.package_first_number }}"
-        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git"
         git push origin main --force
         git push origin --tags
       working-directory: ${{env.PORTAL_REPO_DIR}}
