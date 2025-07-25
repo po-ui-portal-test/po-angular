@@ -108,7 +108,6 @@ jobs:
              -d "{\"name\":\"$REPO_NAME\", \"private\":false, \"has_issues\":false, \"has_projects\":false, \"has_wiki\":false}"
         echo "repo-url=https://github.com/po-ui-portal-test/$REPO_NAME" >> "$GITHUB_OUTPUT"
         echo "repository_name=$REPO_NAME" >> "$GITHUB_OUTPUT"
-      working-directory: ${{env.WORKING_DIR}}
 
     - name: Log URL to the repo
       run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
@@ -154,7 +153,9 @@ jobs:
     - name: Copy portal build to the repository
       if: steps.check-version.outputs.version_check == 'not_equal'
       run: |
-        ls -la
+        cd dist
+        ls -R
+        cd ..
         cp -r ${{env.WORKING_DIR}}/dist/portal/browser/* po-portal/
       working-directory: ${{env.WORKING_DIR}}
     
