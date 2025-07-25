@@ -158,6 +158,7 @@ jobs:
     - name: Commit and push changes to the portal build repository
       if: steps.check-version.outputs.version_check == 'not_equal'
       run: |
+        git checkout gh-pages
         git add .
         git commit -m "Deploy portal build for version ${{ steps.check-version.outputs.package_version }}"
         git tag "v${{ steps.check-version.outputs.package_first_number }}"
