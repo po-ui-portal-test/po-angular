@@ -3,7 +3,7 @@ name: PO-UI Publish Portal
 env:
   AZURE_WEBAPP_NAME: wa-po-ui
   AZURE_WEBAPP_PACKAGE_PATH: /home/runner/work/po-angular/po-angular/po-angular/dist/portal/browser
-  WORKING_DIR: /home/runner/work/po-angular/po-angular/
+  WORKING_DIR: /home/runner/work/po-angular/po-angular/po-angular
 
 on:
   workflow_dispatch:
@@ -132,7 +132,7 @@ jobs:
         git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
         git push -u origin main --force
         pwd
-      working-directory: ${{env.WORKING_DIR}}
+        ls
     
     - name: Check out to Portal Build Repository
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'true'
@@ -145,7 +145,6 @@ jobs:
     - name: Install angular cli
       if: steps.check-version.outputs.version_check == 'not_equal'
       run: npm install -g @angular/cli
-      working-directory: ${{env.WORKING_DIR}}
     
     - name: Build portal
       if: steps.check-version.outputs.version_check == 'not_equal'
@@ -155,7 +154,8 @@ jobs:
     - name: Copy portal build to the repository
       if: steps.check-version.outputs.version_check == 'not_equal'
       run: |
-        cp -r ${{ env.WORKING_DIR }}/dist/portal/browser/* po-portal/
+        ls -la
+        cp -r ${{env.WORKING_DIR}}/dist/portal/browser/* po-portal/
       working-directory: ${{env.WORKING_DIR}}
     
     - name: Commit and push changes to the portal build repository
