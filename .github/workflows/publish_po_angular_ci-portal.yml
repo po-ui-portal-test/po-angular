@@ -122,7 +122,7 @@ jobs:
     
     - name: Clone portal repository
       run: |
-        git clone "https://github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}" po-portal
+        git clone "https://github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git" po-portal
         git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git"
 
     - name: Add readme to the repository if not exists
@@ -133,7 +133,7 @@ jobs:
         git init
         git add README.md
         git commit -m "Initial commit with README"
-        git push -u origin main --force
+        git push -u origin main
         pwd
         ls
     
