@@ -122,8 +122,8 @@ jobs:
     
     - name: Clone portal repository
       run: |
-        git clone "https://github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}" po-portal
-        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
+        git clone "https://github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}" po-portal
+        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git"
 
     - name: Add readme to the repository if not exists
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
