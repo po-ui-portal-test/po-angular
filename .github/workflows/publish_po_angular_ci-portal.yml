@@ -3,7 +3,7 @@ name: PO-UI Publish Portal
 env:
   AZURE_WEBAPP_NAME: wa-po-ui
   AZURE_WEBAPP_PACKAGE_PATH: /home/runner/work/po-angular/po-angular/po-angular/dist/portal/browser
-  WORKING_DIR: /home/runner/work/po-angular/po-angular/po-angular
+  WORKING_DIR: /home/runner/work/po-angular/po-angular/
 
 on:
   workflow_dispatch:
@@ -131,6 +131,7 @@ jobs:
         git commit -m "Initial commit with README"
         git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
         git push -u origin main --force
+        pwd
       working-directory: ${{env.WORKING_DIR}}
     
     - name: Check out to Portal Build Repository
