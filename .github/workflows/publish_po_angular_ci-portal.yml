@@ -123,6 +123,8 @@ jobs:
     - name: Clone portal repository
       run: |
         git clone "https://github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git" po-portal
+        cd po-portal
+        git init
         git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git"
 
     - name: Add readme to the repository if not exists
