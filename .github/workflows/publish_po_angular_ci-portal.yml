@@ -130,6 +130,7 @@ jobs:
     - name: Add readme to the repository if not exists
       if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
       run: |
+        git init
         git checkout -b gh-pages
         echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
         cd po-portal
