@@ -23,145 +23,19 @@ jobs:
       with:
         repository: po-ui/po-style
         path: po-style
-
-    # Check if dist-tags.latest first number before . is equal to package.json version
-    - name: Check if dist-tags.latest first number before . is equal to package.json version and store first number in output
-      id: check-version
-      run: |
-        latest_version=$(npm show @po-ui/ng-components dist-tags.latest)
-        package_version=$(node -p "require('./package.json').version")
-        latest_first_number=$(echo $latest_version | cut -d '.' -f 1)
-        package_first_number=$(echo $package_version | cut -d '.' -f 1)
-
-        if [ "$latest_first_number" = "$package_first_number" ]; then
-          echo "version_check=equal" >> "$GITHUB_OUTPUT"
-        else
-          echo "version_check=not_equal" >> "$GITHUB_OUTPUT"
-        fi
-        
-        echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
-        echo "package_first_number=$package_first_number" >> "$GITHUB_OUTPUT"
-      working-directory: ${{env.WORKING_DIR}}
-
-    - name: Install and Build
-      run: npm install && npm run build
-      working-directory: ${{env.WORKING_DIR}}
-
-    # PUBLISH PORTAL
-    - name: portal build docs
-      run: npm run build:portal:docs
-      working-directory: ${{env.WORKING_DIR}}
-    
-    - name: portal build prod
-      if: steps.check-version.outputs.version_check == 'equal'
-      run: npm run build:portal:prod
-      working-directory: ${{env.WORKING_DIR}}
-    
-    # # Deploy to Azure Web App if version check is equal
-    # - name: Deploy to Azure Web App
-    #   if: steps.check-version.outputs.version_check == 'equal'
-    #   uses: azure/webapps-deploy@v2
-    #   with:
-    #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
-    #     package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-    #     publish-profile: ${{ secrets.AZURE_TOKEN }}
-
-    # Deploy to github pages if version check is equal
-    - name: Deploy to GitHub Pages
-      if: steps.check-version.outputs.version_check == 'equal'
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ${{ env.WORKING_DIR }}/dist/portal/browser
-        publish_branch: gh-pages
-
-    # Deploy to a specific repository containing the portal build
-    - name: Check if repository exists
-      if: steps.check-version.outputs.version_check == 'not_equal'
-      id: check-repo
-      run: |
-        REPO_URL="https://api.github.com/repos/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
-        response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$REPO_URL")
-        if [ "$response" -eq 200 ]; then
-          echo "repository_exists=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "repository_exists=false" >> "$GITHUB_OUTPUT"
-        fi
-      working-directory: ${{env.WORKING_DIR}}
-    
-    # - name: Create repository if not exists
-    #   if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
-    #   uses: repo-ctrl/create-repo-action@main 
-    #   id: create-repo
-    #   with:
-    #     repo-name: 'po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}'
-    #     org-admin-token: '${{ secrets.ORG_ADMIN_TOKEN }}'
-
-    - name: Create repository via API if not exists
-      id: create-repo
-      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
-      run: |
-        REPO_NAME="po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}"
-        curl -H "Authorization: token ${{ secrets.ORG_ADMIN_TOKEN }}" \
-             -H "Accept: application/vnd.github.v3+json" \
-             https://api.github.com/orgs/po-ui-portal-test/repos \
-             -d "{\"name\":\"$REPO_NAME\", \"private\":false, \"has_issues\":false, \"has_projects\":false, \"has_wiki\":false}"
-        echo "repo-url=https://github.com/po-ui-portal-test/$REPO_NAME" >> "$GITHUB_OUTPUT"
-        echo "repository_name=$REPO_NAME" >> "$GITHUB_OUTPUT"
-
-    - name: Log URL to the repo
-      run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
-    
-    - name: Configure git
-      if: steps.check-version.outputs.version_check == 'not_equal'
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git config --global init.defaultBranch main
-
-    - name: Add readme to the repository if not exists
-      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'false'
-      run: |
-        git clone "https://github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}" po-portal
-        echo "# PO UI Portal v${{ steps.check-version.outputs.package_first_number }}" > po-portal/README.md
-        cd po-portal
-        git init
-        git add README.md
-        git commit -m "Initial commit with README"
-        git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/${{ steps.create-repo.outputs.repository_name }}.git"
-        git push -u origin main --force
-        pwd
-        ls
     
     - name: Check out to Portal Build Repository
-      if: steps.check-version.outputs.version_check == 'not_equal' && steps.check-repo.outputs.repository_exists == 'true'
       uses: actions/checkout@v4
       with:
-        repository: po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}
-        path: po-portal
+        repository: po-ui-portal-test/po-ui-portal-v17
+        path: po-portal-checkout
         ref: main
-    
-    - name: Install angular cli
-      if: steps.check-version.outputs.version_check == 'not_equal'
-      run: npm install -g @angular/cli
-    
-    - name: Build portal
-      if: steps.check-version.outputs.version_check == 'not_equal'
-      run: ng build portal --configuration production --base-href "https://po-ui-portal-test.github.io/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}/"
-      working-directory: ${{env.WORKING_DIR}}
-    
-    - name: Copy portal build to the repository
-      if: steps.check-version.outputs.version_check == 'not_equal'
+
+    - name: Clone Portal Build Repository
       run: |
-        cp -r ${{env.WORKING_DIR}}/dist/portal/* po-portal/
-      working-directory: ${{env.WORKING_DIR}}
-    
-    - name: Commit and push changes to the portal build repository
-      if: steps.check-version.outputs.version_check == 'not_equal'
+        git clone "https://github.com/po-ui-portal-test/po-ui-portal-v17" po-portal-clone
+      
+    - name: List directories
       run: |
-        git add .
-        git commit -m "Deploy portal build for version ${{ steps.check-version.outputs.package_version }}"
-        git tag "v${{ steps.check-version.outputs.package_first_number }}"
-        git push
-        git push --tags
-      working-directory: ${{env.WORKING_DIR}}/po-portal
+        pwd
+        ls
