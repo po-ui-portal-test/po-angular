@@ -164,6 +164,6 @@ jobs:
         git commit -m "Deploy portal build for version ${{ steps.check-version.outputs.package_version }}"
         git tag "v${{ steps.check-version.outputs.package_first_number }}"
         git remote set-url origin "https://${{ secrets.ORG_ADMIN_TOKEN }}@github.com/po-ui-portal-test/po-ui-portal-v${{ steps.check-version.outputs.package_first_number }}.git"
-        git push
-        git push --tags
+        git push origin main --force
+        git push origin --tags
       working-directory: ${{env.PORTAL_REPO_DIR}}
