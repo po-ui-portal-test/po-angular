@@ -1,5 +1,13 @@
 <po-navbar [p-logo]="logoPoUI" p-shadow [p-icon-actions]="iconActions" [p-items]="items"> </po-navbar>
 
+<ng-template #versionSelector>
+  <select class="version-selector" (change)="changeVersion($event.target.value)">
+    @for (item of versions; track $index) {
+      <option [value]="item.value" [selected]="item.value === portalVersion">{{ item.label }}</option>
+    }
+  </select>
+</ng-template>
+
 <!-- <po-menu #userMenu [p-menus]="menus" p-filter></po-menu> -->
 
 <div class="po-wrapper">
