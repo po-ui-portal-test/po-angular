@@ -11,8 +11,7 @@ export class PoNavbarActionPopupComponent {
   @Input('p-icon-actions') iconActions: Array<PoNavbarIconAction>;
 
   getLastIconAction() {
-    if (this.iconActions && this.iconActions.length) {
-      return this.iconActions[this.iconActions.length - 1].icon;
-    }
+    // Returns the last icon action from the list of icons that contains a string, not a template reference.
+    return this.iconActions?.find(iconAction => typeof iconAction.icon === 'string')?.icon;
   }
 }
