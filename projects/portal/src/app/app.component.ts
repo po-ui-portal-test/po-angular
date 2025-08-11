@@ -33,8 +33,10 @@ export class AppComponent implements OnInit, OnDestroy {
   a11yLevel: PoThemeA11yEnum;
 
   portalVersion = environment.portalVersion;
-  versions = environment.versions.map(version => ({ label: version, value: version }));
+  portalVersions = environment.portalVersions.map(version => ({ label: version, value: version }));
+
   @ViewChild('versionSelector', { static: true }) versionSelectorTemplate: TemplateRef<any>;
+  @ViewChild('versionSelectorModal', { static: true }) versionSelectorModal: any;
 
   private location;
   private themeChangeListener: any;
@@ -168,13 +170,14 @@ export class AppComponent implements OnInit, OnDestroy {
       },
       {
         icon: this.versionSelectorTemplate,
-        label: '',
+        label: 'Versões',
         tooltip: '',
         action: () => {
-          alert('Select a version to navigate to the corresponding portal.');
-        },
-        // @ts-ignore
-        disabled: true
+          const activeElement = document.activeElement as HTMLElement;
+          if (activeElement && !activeElement.classList.contains('version-selector')) {
+            this.versionSelectorModal.open();
+          }
+        }
       }
     ];
   }

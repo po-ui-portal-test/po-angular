@@ -13,14 +13,6 @@ body {
   color: #333;
 }
 
-app-root > po-navbar po-navbar-action .version-selector {
-  font-family: var(--font-family), sans-serif;
-  font-size: 14px;
-  color: var(--color-navbar-item-color);
-
-  border: 0px;
-}
-
 .dot {
   border-radius: 50%;
   display: inline-block;
@@ -799,6 +791,31 @@ blockquote {
 @media print {
   .card-list-item::before,
   .card-list-item::after {
+    display: none;
+  }
+}
+
+/* Navbar Version Selector */
+app-root > po-navbar po-navbar-action .version-selector {
+  font-family: var(--font-family), sans-serif;
+  font-size: 14px;
+  color: var(--color-navbar-item-color);
+  cursor: pointer;
+
+  border: 0px;
+}
+
+app-root > po-navbar po-navbar-action .version-selector-icon {
+  display: none;
+}
+
+.version-selector-modal .po-row po-button,
+.version-selector-modal .po-row po-button button {
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  app-root > po-navbar po-popup select.version-selector {
     display: none;
   }
 }
